@@ -72,12 +72,32 @@ You can add more tests in `tests/test_recommender.py`.
 Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
 
 ```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+Loading songs from data/songs.csv...
+18
+
+============================================================
+ TOP 5 RECOMMENDATIONS
+============================================================
+
+1. Sunrise City                        Score: 4.96
+   - genre match (+2.0 pts): pop
+   - mood match (+1.0 pt): happy
+   - energy similarity (+1.96 pts): song energy 0.82 vs target 0.80
+
+2. Gym Hero                            Score: 3.74
+   - genre match (+2.0 pts): pop
+   - energy similarity (+1.74 pts): song energy 0.93 vs target 0.80
+
+3. Rooftop Lights                      Score: 2.92
+   - mood match (+1.0 pt): happy
+   - energy similarity (+1.92 pts): song energy 0.76 vs target 0.80
+
+4. Basement Bounce                     Score: 2.00
+   - energy similarity (+2.00 pts): song energy 0.80 vs target 0.80
+
+5. Night Drive Loop                    Score: 1.90
+   - energy similarity (+1.90 pts): song energy 0.75 vs target 0.80
+
 ```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
@@ -86,11 +106,160 @@ Paste a sample of your recommender's output here as a text block so a reader can
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+(.venv) ericedmonds@Erics-MacBook-Pro-2 ai110-module3show-musicrecommendersimulation-starter % python -m src.main 
+Loading songs from data/songs.csv...
+Loaded 18 songs.
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+
+======================================================================
+ Baseline: High-Energy Pop
+ prefs: {'favorite_genre': 'pop', 'favorite_mood': 'happy', 'target_energy': 0.9, 'likes_acoustic': False}
+======================================================================
+
+1. Sunrise City                        Score: 5.34
+   - genre match (+2.0 pts): pop
+   - mood match (+1.0 pt): happy
+   - energy similarity (+1.84 pts): song energy 0.82 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+2. Gym Hero                            Score: 4.44
+   - genre match (+2.0 pts): pop
+   - energy similarity (+1.94 pts): song energy 0.93 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+3. Rooftop Lights                      Score: 3.22
+   - mood match (+1.0 pt): happy
+   - energy similarity (+1.72 pts): song energy 0.76 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+======================================================================
+ Baseline: Chill Lofi
+ prefs: {'favorite_genre': 'lofi', 'favorite_mood': 'chill', 'target_energy': 0.3, 'likes_acoustic': True}
+======================================================================
+
+1. Library Rain                        Score: 5.40
+   - genre match (+2.0 pts): lofi
+   - mood match (+1.0 pt): chill
+   - energy similarity (+1.90 pts): song energy 0.35 vs target 0.30
+   - acoustic preference match (+0.5 pts)
+
+2. Midnight Coding                     Score: 5.26
+   - genre match (+2.0 pts): lofi
+   - mood match (+1.0 pt): chill
+   - energy similarity (+1.76 pts): song energy 0.42 vs target 0.30
+   - acoustic preference match (+0.5 pts)
+
+3. Focus Flow                          Score: 4.30
+   - genre match (+2.0 pts): lofi
+   - energy similarity (+1.80 pts): song energy 0.40 vs target 0.30
+   - acoustic preference match (+0.5 pts)
+
+======================================================================
+ Baseline: Deep Intense Rock
+ prefs: {'favorite_genre': 'rock', 'favorite_mood': 'intense', 'target_energy': 0.9, 'likes_acoustic': False}
+======================================================================
+
+1. Storm Runner                        Score: 5.48
+   - genre match (+2.0 pts): rock
+   - mood match (+1.0 pt): intense
+   - energy similarity (+1.98 pts): song energy 0.91 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+2. Gym Hero                            Score: 3.44
+   - mood match (+1.0 pt): intense
+   - energy similarity (+1.94 pts): song energy 0.93 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+3. Warehouse Pulse                     Score: 2.46
+   - energy similarity (+1.96 pts): song energy 0.88 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+======================================================================
+ Adversarial: Energetic Sadness (classical/melancholic/energy 0.9/acoustic)
+ prefs: {'favorite_genre': 'classical', 'favorite_mood': 'melancholic', 'target_energy': 0.9, 'likes_acoustic': True}
+======================================================================
+
+1. Paper Boats                         Score: 4.10
+   - genre match (+2.0 pts): classical
+   - mood match (+1.0 pt): melancholic
+   - energy similarity (+0.60 pts): song energy 0.20 vs target 0.90
+   - acoustic preference match (+0.5 pts)
+
+2. Storm Runner                        Score: 1.98
+   - energy similarity (+1.98 pts): song energy 0.91 vs target 0.90
+
+3. Warehouse Pulse                     Score: 1.96
+   - energy similarity (+1.96 pts): song energy 0.88 vs target 0.90
+
+======================================================================
+ Adversarial: Nonexistent genre (opera)
+ prefs: {'favorite_genre': 'opera', 'favorite_mood': 'happy', 'target_energy': 0.5, 'likes_acoustic': True}
+======================================================================
+
+1. Rooftop Lights                      Score: 2.48
+   - mood match (+1.0 pt): happy
+   - energy similarity (+1.48 pts): song energy 0.76 vs target 0.50
+
+2. Sundown Highway                     Score: 2.46
+   - energy similarity (+1.96 pts): song energy 0.48 vs target 0.50
+   - acoustic preference match (+0.5 pts)
+
+3. Sunrise City                        Score: 2.36
+   - mood match (+1.0 pt): happy
+   - energy similarity (+1.36 pts): song energy 0.82 vs target 0.50
+
+======================================================================
+ Adversarial: Out-of-range energy (1.5)
+ prefs: {'favorite_genre': 'rock', 'favorite_mood': 'intense', 'target_energy': 1.5, 'likes_acoustic': False}
+======================================================================
+
+1. Storm Runner                        Score: 4.32
+   - genre match (+2.0 pts): rock
+   - mood match (+1.0 pt): intense
+   - energy similarity (+0.82 pts): song energy 0.91 vs target 1.50
+   - acoustic preference match (+0.5 pts)
+
+2. Gym Hero                            Score: 2.36
+   - mood match (+1.0 pt): intense
+   - energy similarity (+0.86 pts): song energy 0.93 vs target 1.50
+   - acoustic preference match (+0.5 pts)
+
+3. Riot Fuel                           Score: 1.44
+   - energy similarity (+0.94 pts): song energy 0.97 vs target 1.50
+   - acoustic preference match (+0.5 pts)
+
+======================================================================
+ Adversarial: Empty profile
+ prefs: {}
+======================================================================
+
+1. Sunrise City                        Score: 0.00
+   - no matching criteria, included as closest available option
+
+2. Midnight Coding                     Score: 0.00
+   - no matching criteria, included as closest available option
+
+3. Storm Runner                        Score: 0.00
+   - no matching criteria, included as closest available option
+
+======================================================================
+ Adversarial: Metal but likes_acoustic=True
+ prefs: {'favorite_genre': 'metal', 'favorite_mood': 'angry', 'target_energy': 0.95, 'likes_acoustic': True}
+======================================================================
+
+1. Riot Fuel                           Score: 4.96
+   - genre match (+2.0 pts): metal
+   - mood match (+1.0 pt): angry
+   - energy similarity (+1.96 pts): song energy 0.97 vs target 0.95
+
+2. Gym Hero                            Score: 1.96
+   - energy similarity (+1.96 pts): song energy 0.93 vs target 0.95
+
+3. Storm Runner                        Score: 1.92
+   - energy similarity (+1.92 pts): song energy 0.91 vs target 0.95
+
+(.venv) ericedmonds@Erics-MacBook-Pro-2 ai110-module3show-musicrecommendersimulation-starter % 
+
 
 ---
 
@@ -98,13 +267,7 @@ Use this section to document the experiments you ran. For example:
 
 Summarize some limitations of your recommender.
 
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+The recommender is limited by a small, static catalog — it can only recommend songs already in songs.csv, so it has no ability to discover new music, and a user whose taste doesn't overlap with the existing genres/moods will get weak matches no matter how well the algorithm runs. It's purely content-based with no collaborative filtering, so it can never produce the "people who liked X also liked Y" recommendations that come from learning across many users — every score depends entirely on hand-coded rules applied to one song at a time. The taste profile is also static: there's no feedback loop, so the system never learns from skips, replays, or thumbs-up/down, and a user's profile has to be manually updated to reflect a change in taste. Genre and mood matching rely on exact string equality, which is brittle — "rock" and "hard rock," or "intense" and "energetic," are treated as completely unrelated even if they'd feel similar to a listener. The point weights themselves (2.0/1.0/2.0/0.5) were chosen by hand rather than derived from user testing or data, so there's a real risk they don't actually reflect what makes a recommendation feel right, and as noted earlier they likely overweight genre relative to mood and energy. Finally, the algorithm has no concept of diversity — nothing stops the top-k results from clustering around a single artist or a narrow slice of the catalog, and features like valence, danceability, and tempo are ignored entirely, so songs that differ meaningfully on those axes can still score identically.
 
 ---
 
