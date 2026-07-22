@@ -143,9 +143,11 @@ class Recommender:
     Required by tests/test_recommender.py
     """
     def __init__(self, songs: List[Song]):
+        """Store the song catalog this recommender will score against."""
         self.songs = songs
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
+        """Return the top k songs ranked by score against the user's profile."""
         user_dict = asdict(user)
         scored = [
             (song, _compute_score(user_dict, asdict(song))[0])
@@ -155,6 +157,7 @@ class Recommender:
         return [song for song, _ in scored[:k]]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
+        """Return a human-readable breakdown of one song's score for this user."""
         score, reasons = _compute_score(asdict(user), asdict(song))
         return f"Score {score}: " + "; ".join(reasons)
 
