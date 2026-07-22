@@ -17,17 +17,11 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world recommenders like Spotify or Netflix typically blend two approaches: content-based filtering, which compares an item's own attributes (genre, tempo, audio features) against what a user has liked before, and collaborative filtering, which looks at patterns across many users ("people who liked X also liked Y"). They also weigh implicit signals heavily — skip rate, replay count, time of day — not just what a user says they like. My version is a simplified content-based system: it has no listening history or other users to learn from, so it relies entirely on a user's stated preferences (favorite genre, favorite mood, target energy, acoustic preference) compared directly against each song's own attributes. It prioritizes energy match and genre match most heavily, since those proved the strongest signals for distinguishing one song's vibe from another in my data, treats mood as a secondary confirming signal, and uses acoustic preference as a lighter-weight factor.
 
-Some prompts to answer:
-
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
-
-You can include a simple diagram or bullet list if helpful.
+Features used by Song and UserProfile:
+Song — id, title, artist, genre, mood, energy, tempo_bpm, valence, danceability, acousticness (of these, the scoring algorithm actively uses genre, mood, energy, and acousticness).
+UserProfile — favorite_genre, favorite_mood, target_energy, likes_acoustic.
 
 ---
 
