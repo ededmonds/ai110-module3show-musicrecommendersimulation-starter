@@ -1,4 +1,57 @@
+"""
+Content-based music recommender.
+
+How The System Works
+---------------------
+Data flows through three stages:
+
+  1. INPUT   - a user's taste profile (a dict, or a UserProfile instance)
+               describing favorite_genre, favorite_mood, target_energy,
+               and likes_acoustic.
+  2. PROCESS - The Loop: every song loaded from songs.csv is judged
+               individually against that profile via score_song() /
+               _compute_score(), which returns a point total plus a list
+               of human-readable reasons for the score.
+  3. OUTPUT  - The Ranking: all scored songs are sorted descending and
+               sliced to the top K, returned as (song, score, explanation)
+               tuples (functional API) or a list of Song objects
+               (Recommender.recommend, OOP API). Both APIs share the same
+               scoring logic, so they always agree.
+
+Algorithm Recipe (finalized, point-based)
+------------------------------------------
+Each song earns points against the user's profile, out of a maximum of 5.5:
+
+  genre match       : +2.0 pts  if song.genre == favorite_genre
+  mood match        : +1.0 pt   if song.mood == favorite_mood
+  energy similarity : up to +2.0 pts, scaled by closeness -
+                       2.0 * max(0, 1 - |song.energy - target_energy|)
+  acoustic match    : +0.5 pts  if song.acousticness is on the correct
+                       side of 0.5 for the user's likes_acoustic preference
+
+Any preference key missing from user_prefs (e.g. a starter profile that
+only sets favorite_genre/favorite_mood/target_energy) is simply skipped -
+no points are awarded or lost for it, and no KeyError is raised. Songs are
+ranked by total points, descending.
+
+Potential Biases
+-----------------
+- Over-prioritizes genre: at 2.0 of 5.5 possible points (36%), a song that
+  is a near-perfect mood/energy match but the "wrong" genre can still lose
+  to a same-genre song that fits the user's mood and energy poorly.
+- Exact-match only: genre and mood matching is a literal string comparison,
+  so "rock" gets zero credit for a sonically similar "synthwave" song, and
+  "intense" gets no credit for "energetic."
+- Hard acoustic cutoff: the +0.5 bonus is a step function at 0.5
+  acousticness, so a song at 0.49 and a song at 0.02 are scored identically
+  as "not acoustic," losing nuance near the boundary.
+- Ignores valence, danceability, and tempo entirely, so two songs that
+  match on genre/mood/energy/acousticness score identically even if one is
+  fast and danceable and the other isn't.
+"""
+
 import csv
+import heapq
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -33,24 +86,8 @@ class UserProfile:
     likes_acoustic: bool
 
 
-# ---------------------------------------------------------------------------
-# Algorithm Recipe (point-based)
-# ---------------------------------------------------------------------------
-# Each song earns points against a user's taste profile. Max possible score
-# is 5.5 when every preference is supplied and fully matched:
-#
-#   genre match    : +2.0 pts  if song.genre == favorite_genre
-#   mood match      : +1.0 pt   if song.mood == favorite_mood
-#   energy similarity: up to +2.0 pts, scaled by closeness -
-#                      2.0 * max(0, 1 - |song.energy - target_energy|)
-#   acoustic match  : +0.5 pts  if song.acousticness is on the correct side
-#                      of 0.5 for the user's likes_acoustic preference
-#
-# Any preference key missing from user_prefs (e.g. a starter profile that
-# only sets favorite_genre/favorite_mood/target_energy) is simply skipped -
-# no points are awarded or lost for it, and no KeyError is raised.
-# ---------------------------------------------------------------------------
-
+# See the module docstring above ("Algorithm Recipe") for the full
+# point-weighting rationale.
 POINTS = {
     "genre": 2.0,
     "mood": 1.0,
@@ -155,12 +192,14 @@ def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tup
     """
     Functional implementation of the recommendation logic.
     Required by src/main.py
-    """
-    results = []
-    for song in songs:
-        score, reasons = score_song(user_prefs, song)
-        explanation = "; ".join(reasons)
-        results.append((song, score, explanation))
 
-    results.sort(key=lambda item: item[1], reverse=True)
-    return results[:k]
+    Every song is judged by score_song() via a generator expression (lazy,
+    no intermediate list), then heapq.nlargest() picks the top k by score
+    in O(n log k) instead of sorting the full catalog in O(n log n).
+    """
+    scored = (
+        (song, *score_song(user_prefs, song))
+        for song in songs
+    )
+    top = heapq.nlargest(k, scored, key=lambda item: item[1])
+    return [(song, score, "; ".join(reasons)) for song, score, reasons in top]
